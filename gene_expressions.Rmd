@@ -15,10 +15,10 @@ This is an R Markdown document. Markdown is a simple formatting syntax for autho
 
 When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
 
-```{r cars}
-library("readxl")
-data_CD630 <- read_excel("GSE173804_CD630_raw_data.xlsx")
-data_196 <- read_excel("GSE173804_196_raw_data.xlsx")
+```{r}
+data_CD630 = read.csv("GSE173804_CD630_raw_data.csv")
+data_196 = read.csv("GSE173804_196_raw_data.csv")
+data_196
 ```
 
 
