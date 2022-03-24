@@ -1,0 +1,48 @@
+---
+title: "Proposal"
+author: "Rico ten Brink"
+date: "3/18/2022"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+# Proposal
+
+## Subject
+
+Clostridioides Difficile is a gram-positive, spore-forming bacterium found in mammals. C. Difficile can produce toxins that mediate disease progression in humans. This is called Clostridioides Difficile infection (CDI) and can eventually lead to death. The bacterium is considered an obligate anaerobe. In this study strain CD630 (ribotype 012) and CD196 (ribotype 027) were analyzed how they adapt in an environment 1.5% oxygen.
+
+## Methods 
+
+Clostridioide difficile strains 630 and 196 were cultured in yeast extract (BHIS). Routine cultivation of C. Difficile was performed in an anaerobic chamber (Coy). The C. Difficile were moved to a hypoxia chamber with 1.5% oxygen to see the effects of oxygen. The hypoxia chamber was measured with the following oxygen percentages: 1.5%, 2% and 5%. So the 2 strains were studied in an anaerobic atmosphere and a microaerobic atmosphere. To extract RNA the samples were maintained on ice. To determine the RNA quantity and qualtity a Qubit fluorometer and Bioanalyzer TapeStation were used
+
+## Results
+
+The results of the Clostridiode Difficile research are divided in the microaerobic study and the anaerobic study. The microaerobic study shows that the C. Difficile strains failed to grow at a oxygen level of 5% in the atmosphere. But at 1.5% and 2% they would still be able to grow. This is due to the fact that some anaerobic organisms can tolerate toxic atmoshperes if they had time to adapt to it. But only slightly toxic as the results show they couldn't handle the atmosphere at 5% oxygen. The anearobic study was performed by infecting mice with the two strains of C.difficile. The two strains reached similar levels of gut colonization and 1 day post-infection tissue hipoxia levels  were  also similar between the strains. The CD196 strain causes more severe disease in mice than the CD630 strain. 
+
+## Conclusion
+
+While being obligate anaerobic the C.difficile can adapt to grow in a environment with low oxygen levels. This is due to the evolvment of oxygen-resistant metabolic pathways and ROS detoxification systems of organisms. This adaptation includes increase of expression of genes encoding oxygen detoxification enzymes and metal homeostasis proteins. Significant differences have been discovered between the CD196 and CD630 strains in the oxygen-dependent and oxygen-independent during this research. C. difficile is well suited to survive multiple environmental stresses, although the responses may vary between strains.
+
+## Software and libraries
+
+All bioinformatic analyses were performed using CLC Genomics Workbench (version 20.0.1.). Volcano pots and distribution maps denoting fold-changes across the genome were generated using GraphPad Prism
+
+
+
+
+
+
+
+
+
+
+
+
+
+
