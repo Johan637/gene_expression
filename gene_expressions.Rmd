@@ -17,8 +17,201 @@ When you click the **Knit** button a document will be generated that includes bo
 
 ```{r}
 data_CD630 = read.csv("GSE173804_CD630_raw_data.csv")
-data_196 = read.csv("GSE173804_196_raw_data.csv")
-data_196
+data_CD196 = read.csv("GSE173804_196_raw_data.csv")
+```
+
+```{r}
+
+
+dCD196 = data.frame(AW27=as.numeric(data_CD196$X2691.AW.27.CAGGTTCA.ATAACGCC_S01_L001_R1_001...Total.counts), AW28=as.numeric(data_CD196$X2691.AW.28.GAACGAAG.GAATCACC_S01_L001_R1_001...Total.counts), AW30=as.numeric(data_CD196$X2691.AW.30.CATGAGCA.GATCTTGC_S01_L001_R1_001...Total.counts), AW29=as.numeric(data_CD196$X2691.AW.29.CTCAGAAG.GGCAAGTT_S01_L001_R1_001....Total.counts), AW31=as.numeric(data_CD196$X2691.AW.31.GACGAACT.CAATGCGA_S01_L001_R1_001...Total.counts), AW32=as.numeric(data_CD196$X2691.AW.32.AGACGCTA.GGTGTACA_S01_L001_R1_001...Total.counts))
+rownames(dCD196) = data_CD196$Name
+
+
+dCD630 = data.frame(AW34=as.numeric(data_CD630$X2691.AW.34.GAATCACC.GAACGAAG_S01_L001_R1_001...Total.counts), AW33=as.numeric(data_CD630$X2691.AW.33.ATAACGCC.CAGGTTCA_S01_L001_R1_001...Total.counts), AW35=as.numeric(data_CD630$X2691.AW.35.GGCAAGTT.CTCAGAAG_S01_L001_R1_001...Total.counts), AW36=as.numeric(data_CD630$X2691.AW.36.GATCTTGC.CATGAGCA_S01_L001_R1_001..Total.counts), AW37=as.numeric(data_CD630$X2691.AW.37.CAATGCGA.GACGAACT_S01_L001_R1_001...Total.counts), AW38=as.numeric(data_CD630$X2691.AW.38.GGTGTACA.AGACGCTA_S01_L001_R1_001...Total.counts))
+rownames(dCD630) = data_CD630$Name
+
+
+data = merge(dCD196, dCD630, by = 0, all.x = TRUE, all.y = TRUE,
+                sort = FALSE)
+# Change all NA's introduced by the merge to zeros
+data[is.na(data)] <- 0
+# Show column names coming from the input files
+
+summary(data)
+rnms = c(data$Row.names)
+rownames(data) = rnms
+data = data[2:length(data)]
+boxplot(log2(data + 1))
+
+```
+```{r}
+
+mycolors = hue_pal()(4)
+
+## Plot the log2-transformed data with a 0.1 pseudocount
+plotDensity(log2(data + 0.1), col=rep(mycolors, each=3),
+            lty=c(1:ncol(data)), xlab='Log2(count)',
+            main='Expression Distribution')
+
+## Add a legend and vertical line
+legend('topright', names(data), lty=c(1:ncol(data)),
+       col=rep(mycolors, each=3), cex = 0.5)
+abline(v=-1.5, lwd=1, col='red', lty=2)
+```
+
+
+```{r}
+barplot(colSums(data) / 1e6)
+```
+
+```{r}
+(ddsmat = DESeqDataSetFromMatrix(countData = data,
+                                  colData = data.frame(samples =
+                                            names(data)),
+                                            design = ~ 1))
+
+```
+
+```{r}
+# Perform normalization
+rldds = vst(ddsmat)
+# 'Extract' normalized values
+rld = assay(rldds)
+head(rld)
+```
+
+
+```{r}
+sampdists = dist( t( rld ))
+sampdists
+```
+
+```{r}
+# Convert the 'dist' object into a matrix for creating a heatmap
+sampdmat = as.matrix(sampdists)
+
+# The annotation is an extra layer that will be plotted above the heatmap columns
+# indicating the cell type
+sampdmat
+ann = data.frame(CD = factor(c(rep(1, 6), rep(2, 6)), 
+                                        labels = c("CD196", "CD630")))
+   
+
+# Set the rownames of the annotation dataframe to the sample names (required)
+rownames(ann) = names(data)
+
+pheatmap(sampdmat, show_colnames = FALSE,
+         annotation_col = ann,
+         clustering_distance_rows = sampdists,
+         clustering_distance_cols = sampdists,
+         main = "Euclidean Sample Distances")
+```
+
+
+```{r}
+# Use the raw (not r-log transformed!) counts
+ds = assay(ddsmat)
+pd = PoissonDistance(t(ds))
+# Extract the matrix with distances
+spdm = as.matrix(pd$dd)
+# Calculate the MDS and get the X- and Y-coordinates
+mdpd = data.frame( cmdscale(spdm) )
+
+# And set some better readable names for the columns
+names(mdpd) = c('x_coord', 'y_coord')
+```
+
+
+```{r}
+# Separate the annotation factor (as the variable name is used as label)
+grs = factor(c(rep(1, 6), rep(2, 6)), labels = c("CD196", "CD630"))
+cd = names(data)
+
+
+# Create the plot using ggplot
+ggplot(mdpd, aes(x_coord, y_coord, color = grs, label = cd)) + 
+  geom_text(size = 4) +
+  ggtitle('Multi Dimensional Scaling') +
+  labs(x = "Poisson Distance", y = "Poisson Distance") +
+  theme_bw()
+
+```
+
+
+```{r}
+des = model.matrix( ~ 0 + grs)
+cdt = data.frame(des = names(data))
+ddsMatt = DESeqDataSetFromMatrix(countData = data, colData = cdt, design = des)
+deds = DESeq(ddsMatt)
+ress = results(deds)
+resultsNames(deds)
+lfcres = lfcShrink(deds, 2)
+head(results(deds, tidy=TRUE)) # let's look at the results table
+```
+
+```{r}
+cd196 = data.frame(groups = names(dCD196))
+ddsMatt196 = DESeqDataSetFromMatrix(countData = dCD196, colData = cd196, design = ~1)
+deds196 = DESeq(ddsMatt196)
+res196 = results(deds196)
+res196
+lfcres196 = lfcShrink(deds196, names(res196), res = res196)
+
+
+cd630 = data.frame(groups = names(dCD630))
+ddsMatt630 = DESeqDataSetFromMatrix(countData = dCD630, colData = cd630, design = ~1)
+deds630 = DESeq(ddsMatt630)
+res630 = results(deds630)
+
+resultsNames(deds630)
+resultsNames(deds630)
+res630
+res196
+
+```
+
+
+```{r}
+deseq.volcano = function(res, datasetName) {
+  return(EnhancedVolcano(res, x = 'log2FoldChange', y = 'padj',
+                         lab=rownames(res),
+                         title = paste(datasetName, "trisomic vs disomic"),
+                         subtitle = bquote(italic('FDR <= 0.05 and absolute FC >= 2')),
+                         # Change text and icon sizes
+                         labSize = 3, pointSize = 1.5, axisLabSize=10, titleLabSize=12,
+                         subtitleLabSize=8, captionLabSize=10,
+                         # Disable legend
+                         legendPosition = "none",
+                         # Set cutoffs
+                         pCutoff = 0.05, FCcutoff = 2))
+}
+
+## Note: input data is the corrected DESeq2 output using the 'lfcShrink' function (see chapter 4)
+deseq.volcano(res = lfcres, datasetName = "Data")
+```
+
+
+
+
+```{r}
+pval_threshold <- 0.05
+degs196 = row.names(ress[which(res196$padj <= pval_threshold), ])
+degs630 = row.names(ress[which(res630$padj <= pval_threshold), ])
+# Arguments for a pairwise (two-sets) venn-diagram are sizes for set1, set2 and overlap (intersect)
+# Many more functions are available for triple, quad and quantuple diagrams (starting with 'draw.***')
+venn.plotd = draw.pairwise.venn(length(degs196),
+                              length(degs630),
+                              # Calculate the intersection of the two sets
+                              length( intersect(degs196, degs630)),
+                                category = c("DEGS CD196", "DEGS CD630"), scaled = F,
+                                fill = c("light blue", "red"), alpha = rep(0.5, 2),
+                                cat.pos = c(0, 0))
+
+
+
+grid.newpage()
+grid.draw(venn.plotd)
+
 ```
 
 
