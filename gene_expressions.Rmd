@@ -194,21 +194,30 @@ deseq.volcano(res = lfcres, datasetName = "Data")
 
 
 ```{r}
-pval_threshold <- 0.05
-degs196 = row.names(ress[which(res196$padj <= pval_threshold), ])
-degs630 = row.names(ress[which(res630$padj <= pval_threshold), ])
-# Arguments for a pairwise (two-sets) venn-diagram are sizes for set1, set2 and overlap (intersect)
-# Many more functions are available for triple, quad and quantuple diagrams (starting with 'draw.***')
-venn.plotd = draw.pairwise.venn(length(degs196),
-                              length(degs630),
+reg = 1
+degsu196 = row.names(res196[which(res196$log2FoldChange < reg), ])
+degsu630 = row.names(res630[which(res630$log2FoldChange < reg), ])
+venn.plotu = draw.pairwise.venn(length(degsu196),
+                              length(degsu630),
                               # Calculate the intersection of the two sets
-                              length( intersect(degs196, degs630)),
+                              length( intersect(degsu196, degsu630)),
                                 category = c("DEGS CD196", "DEGS CD630"), scaled = F,
                                 fill = c("light blue", "red"), alpha = rep(0.5, 2),
                                 cat.pos = c(0, 0))
 
 
+degsd196 = row.names(res196[which(res196$log2FoldChange > reg), ])
+degsd630 = row.names(res630[which(res630$log2FoldChange > reg), ])
+venn.plotd = draw.pairwise.venn(length(degsd196),
+                              length(degsd630),
+                              # Calculate the intersection of the two sets
+                              length( intersect(degsd196, degsd630)),
+                                category = c("DEGS CD196", "DEGS CD630"), scaled = F,
+                                fill = c("light blue", "red"), alpha = rep(0.5, 2),
+                                cat.pos = c(0, 0))
 
+grid.newpage()
+grid.draw(venn.plotu)
 grid.newpage()
 grid.draw(venn.plotd)
 
